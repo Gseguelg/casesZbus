@@ -185,7 +185,7 @@ def make_Zbus(Graph):
         print("NodesUsed:", NodesUsed)
         print(Zbus.todense())
         print()
-    print("Zbus complete!")
+    print("-- Zbus complete!")
     return (Zbus, NodesUsed)
 
 
@@ -217,7 +217,7 @@ def ReorderSparseMatrix(SparseMatrix, OrderList):
 
 
 # Example 8.4 (-1 is RefNode)
-G = nx.Graph()
+G = nx.MultiGraph()  # nx.Graph()
 G.add_nodes_from([-1, 1, 5, 3, 4])
 G.add_edge(-1, 1, weight = 1.25j)
 G.add_edge(1, 5, weight = 0.25j)
