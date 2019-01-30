@@ -11,4 +11,5 @@ Script with example 8.4 and function to create the impedance bus matrix of a pow
 - ☑ Function with Gabriel kron's reduction algorithm.
 - ☑ Function to reorder Zbus's rows and columns according to input list.
 - ☑ Adapt algorithm to work with MultiGraph instead of simple graph (NetworkX).
+- □ Add support for coupled branches (all cases).
 - ☒ Ybus creation from scratch function.
