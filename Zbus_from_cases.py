@@ -1,5 +1,6 @@
 import numpy as np
 from scipy import sparse
+from scipy.sparse import linalg
 import networkx as nx
 
 
@@ -44,11 +45,11 @@ def make_Zbus(Graph):
     """
         Creates a Zbus from the input weighted Graph following the 4 cases for
         original Zbus modifications, described in Chapther 8 Stevenson's book
-        (Table 8.1 sumarizes all four cases). Node -1 is considered as reference,
-        and must exists.
+        (Table 8.1 sumarizes all four cases). Node '-1' is considered as reference,
+        and must exists within Graph's nodes.
 
         Syntax:
-            Zbus = make_Zbus(Graph)
+            Zbus, NodeList = make_Zbus(Graph)
 
         :param Graph:
         :type Graph: networkx simple Graph
@@ -184,10 +185,38 @@ def make_Zbus(Graph):
         print("NodesUsed:", NodesUsed)
         print(Zbus.todense())
         print()
+    print("Zbus complete!")
     return (Zbus, NodesUsed)
 
 
-# Example (-1 is RefNode)
+def ReorderSparseMatrix(SparseMatrix, OrderList):
+    """
+        Order the rows and columns (independently) of the squared SparseMatrix according to the order
+        list OrderList. This function has the main purpose to ease the visualization of the results.
+        Note if OrderList is [0,1,2,...,SparseMatrix.shape[0]] nothing changes.
+
+        Syntax:
+            >>> Matrix = ReorderSparseMatrix(Matrix, [0, 1, 3, 2, 4, ..., Matrix.shape[0]])
+            >>> Matrix.todense()  # coo_matrix to dense
+            [[...], [...]]  # matrix with columns swap according to OrderList, as well as rows.
+
+        :param SparseMatrix: Source sparse matrix to be reordered. Must be Squared.
+        :type SparseMatrix: Any type of scipy.sparse matrix
+
+        :param OrderList: New order of the index matrix. Must have same length of SparseMatrix.
+        :type OrderList: list
+    """
+    # Converts SparseMatrix to coo_matrix
+    SparseMatrix = SparseMatrix.tocoo()  # assures coo_matrix type
+    # Get the index of OrderList that makes it ascending sorted
+    OrderedList = np.argsort(OrderList, kind='quicksort')
+    # reasigns the rows and columns
+    SparseMatrix.row = OrderedList[SparseMatrix.row]
+    SparseMatrix.col = OrderedList[SparseMatrix.col]
+    return SparseMatrix
+
+
+# Example 8.4 (-1 is RefNode)
 G = nx.Graph()
 G.add_nodes_from([-1, 1, 5, 3, 4])
 G.add_edge(-1, 1, weight = 1.25j)
@@ -201,5 +230,15 @@ print(G.edges(data=True))
 print()
 
 Zbus, Nodes = make_Zbus(G)
-print(Zbus.todense())
-print(Nodes)
+print("Zbus:\n", Zbus.todense())
+print("Nodes", Nodes)
+print()
+
+Zbus = ReorderSparseMatrix(Zbus, [0, 2, 1, 3])
+# Zbus = ReorderSparseMatrix(Zbus, Nodes)
+print("Zbus:\n", Zbus.todense())
+Zbus = Zbus.tocsc(copy=False)
+
+# proof needed for Ybus!
+Ybus = linalg.inv(Zbus)
+print("Ybus:\n", Ybus.todense())
